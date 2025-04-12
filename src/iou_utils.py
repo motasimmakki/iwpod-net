@@ -1,33 +1,33 @@
-def compute_iou(box1, box2):
-    """
-    Compute IoU between two bounding boxes.
-    box format: [x1, y1, x2, y2]
-    """
-    xi1 = max(box1[0], box2[0])
-    yi1 = max(box1[1], box2[1])
-    xi2 = min(box1[2], box2[2])
-    yi2 = min(box1[3], box2[3])
-    inter_area = max(0, xi2 - xi1) * max(0, yi2 - yi1)
+import numpy as np
+from shapely.geometry import Polygon
 
-    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
-    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
-    union_area = box1_area + box2_area - inter_area
+def compute_qiou(pts_true, pts_pred):
+    """Compute IoU between two quadrilaterals using shapely."""
+    poly1 = Polygon(pts_true)
+    poly2 = Polygon(pts_pred)
 
-    iou = inter_area / union_area if union_area != 0 else 0
-    return iou
+    if not poly1.is_valid or not poly2.is_valid:
+        return 0.0
 
-def extract_box_from_output(pred):
-    # pred: shape (13, 13, 9)
-    # Example: Find the most confident grid cell and use center/size to construct bounding box
+    inter_area = poly1.intersection(poly2).area
+    union_area = poly1.union(poly2).area
 
-    max_pos = np.unravel_index(np.argmax(pred[...,0]), pred[...,0].shape)
-    cx = (max_pos[1] + pred[max_pos][1]) * 16  # x offset * stride
-    cy = (max_pos[0] + pred[max_pos][2]) * 16  # y offset * stride
-    w  = pred[max_pos][3] * 208
-    h  = pred[max_pos][4] * 208
+    return inter_area / union_area if union_area > 0 else 0.0
 
-    x1 = cx - w / 2
-    y1 = cy - h / 2
-    x2 = cx + w / 2
-    y2 = cy + h / 2
-    return [x1, y1, x2, y2]
+def extract_quad_from_output(pred):
+    affinex = [max(pred[1], 0.), pred[2], pred[3]]
+    affiney = [pred[4], max(pred[5], 0.), pred[6]]
+    affine_matrix_x = np.array(affinex)
+    affine_matrix_y = np.array(affiney)
+
+    v = 0.5
+    base = np.array([
+        [-v, -v, 1],
+        [ v, -v, 1],
+        [ v,  v, 1],
+        [-v,  v, 1]
+    ])
+
+    x_coords = np.dot(base, affine_matrix_x)
+    y_coords = np.dot(base, affine_matrix_y)
+    return np.stack([x_coords, y_coords], axis=1)  # shape: (4,2)

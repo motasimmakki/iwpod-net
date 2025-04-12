@@ -5,7 +5,8 @@ from src.sampler import augment_sample, labels2output_map
 #
 #  Creates ALPR Data Generator
 #
-from src.iou_utils import compute_iou, extract_box_from_output
+from src.iou_utils import compute_qiou, extract_quad_from_output
+import tensorflow as tf
 
 
 class ALPRDataGenerator(keras.utils.Sequence):
@@ -71,16 +72,16 @@ class IoUCallback(tf.keras.callbacks.Callback):
 
             batch_ious = []
             for i in range(len(X_batch)):
-                gt_pts = shapes[i][0].pts  # first LP shape
-                pred_box = extract_box_from_output(y_pred[i])  # implement this function
+                gt_pts = shapes[i][0]  # shape: (2,4)
+                gt_quad = np.stack([
+                    gt_pts[0] * self.data_gen.dim,  # x
+                    gt_pts[1] * self.data_gen.dim   # y
+                ], axis=1)
 
-                # Get gt bounding box from corner points
-                x_coords = gt_pts[0] * self.data_gen.dim
-                y_coords = gt_pts[1] * self.data_gen.dim
-                gt_box = [np.min(x_coords), np.min(y_coords), np.max(x_coords), np.max(y_coords)]
+                pred_quad = extract_quad_from_output(y_pred[i])  # Define this
 
-                iou = compute_iou(gt_box, pred_box)
-                batch_ious.append(iou)
+                qiou = compute_qiou(gt_quad, pred_quad)
+                batch_ious.append(qiou)
 
             avg_iou = np.mean(batch_ious)
             print(f"[IoUCallback] Batch {batch}: Mean IoU = {avg_iou:.4f}")
