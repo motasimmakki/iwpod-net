@@ -181,9 +181,8 @@ if __name__ == '__main__':
 	
 	# -> Model Chekcpoints --  save evey "save_epochs" epochs
 	ckpt = ModelCheckpoint(
-		filepath = model_path_final + '_epoch{epoch:03d}.h5',
-		save_freq= int( np.floor(len(Data)/batch_size)*save_epochs),  # defines frequency of checkpoints
-		save_format = 'h5'
+		filepath = model_path_final + '_epoch{epoch:03d}.keras',
+		save_freq= int( np.floor(len(Data)/batch_size)*save_epochs)  # defines frequency of checkpoints
 	)
 
 	# -> Learning rate control -- can also reduce learning rate dynamically		
