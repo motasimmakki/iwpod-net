@@ -29,8 +29,6 @@ if __name__ == '__main__':
 	#  Loads network and weights
 	#
 	iwpod_net = load_model('weights/iwpod_net')
-	# iwpod_net = load_model('weights/my_trained_iwpodnet_epoch100')
-	# iwpod_net = load_model('weights/my_trained_iwpodnet')
 	
 
 	#
