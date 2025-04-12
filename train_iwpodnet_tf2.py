@@ -28,6 +28,7 @@ from src.utils import image_files_from_folder
 from src.data_generator_tf2 import ALPRDataGenerator
 from create_model_iwpodnet import create_model_iwpodnet
 from tensorflow.keras.callbacks import LearningRateScheduler
+from src.data_generator_tf2 import IoUCallback
 
 
 #
@@ -165,7 +166,15 @@ if __name__ == '__main__':
 	#
 	#  Training generator with lots of data augmentation	
 	#
-	train_generator = ALPRDataGenerator(Data, batch_size = batch_size, dim =  dim, stride = int(model_stride), shuffle=True, OutputScale = 1.0)
+	# train_generator = ALPRDataGenerator(Data, batch_size = batch_size, dim =  dim, stride = int(model_stride), shuffle=True, OutputScale = 1.0)
+	train_generator = ALPRDataGenerator(Data, 
+									 batch_size = batch_size, 
+									 dim =  dim, 
+									 stride = int(model_stride), 
+									 shuffle=True, 
+									 OutputScale = 1.0, 
+									 return_shapes=True)
+	iou_callback = IoUCallback(train_generator)
 
 	#
 	#  Compiles Model
@@ -203,7 +212,7 @@ if __name__ == '__main__':
 	                      steps_per_epoch = np.floor(len(Data)/batch_size),
 	                      epochs = MaxEpochs, 
 	                      verbose = 1,
-	                      callbacks=[learn_control, ckpt])  
+	                      callbacks=[learn_control, ckpt, iou_callback])  
 
 
 	print('Finished to train the model')
