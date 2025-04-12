@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 from tensorflow import keras
 from src.sampler import augment_sample, labels2output_map
@@ -43,16 +44,43 @@ class ALPRDataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
 
-    def __data_generation(self, indexes):
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
+    # def __data_generation(self, indexes):
+    #     'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
 
-        X = np.empty((self.batch_size, self.dim, self.dim, 3))
-        y = np.empty((self.batch_size, self.dim//self.stride, self.dim//self.stride, 9))
-        # Generate data
+    #     X = np.empty((self.batch_size, self.dim, self.dim, 3))
+    #     y = np.empty((self.batch_size, self.dim//self.stride, self.dim//self.stride, 9))
+    #     # Generate data
+    #     for i, idx in enumerate(indexes):
+    #         # Store sample
+    #         XX, llp, ptslist = augment_sample(self.data[idx][0], self.data[idx][1], self.dim)
+    #         YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa = 0.5)
+    #         X[i,] = XX*self.OutputScale
+    #         y[i,] = YY
+    #     return X, y
+
+     # Adding CED layer
+    def __data_generation(self, indexes):
+        'Generates data containing batch_size samples with Canny Edge Concatenation'
+
+        # Change shape to 4 channels (RGB + Canny)
+        X = np.empty((self.batch_size, self.dim, self.dim, 4), dtype=np.float32)
+        y = np.empty((self.batch_size, self.dim // self.stride, self.dim // self.stride, 9), dtype=np.float32)
+
         for i, idx in enumerate(indexes):
-            # Store sample
+            # Augment sample
             XX, llp, ptslist = augment_sample(self.data[idx][0], self.data[idx][1], self.dim)
-            YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa = 0.5)
-            X[i,] = XX*self.OutputScale
-            y[i,] = YY
+
+            # Apply Canny Edge Detection
+            gray = cv2.cvtColor((XX * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+            edges = cv2.Canny(gray, threshold1=100, threshold2=200)
+            edges = edges.astype(np.float32) / 255.0  # Normalize to 0-1
+            edges = np.expand_dims(edges, axis=-1)    # Add channel dimension
+
+            # Concatenate RGB image with edge map
+            X[i] = np.concatenate([XX * self.OutputScale, edges], axis=-1)
+
+            # Generate corresponding label
+            YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa=0.5)
+            y[i] = YY
+
         return X, y

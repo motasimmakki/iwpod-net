@@ -58,10 +58,12 @@ def load_network(modelpath, input_dim):
 		print('Loaded weights')
 	else:
 		print('Training from scratch')
-	input_shape = (input_dim,input_dim,3)
+	# input_shape = (input_dim,input_dim,3)
+	input_shape = (input_dim, input_dim, 4)  # Adding CED layer
 
 	# Fixed input size for training
-	inputs  = keras.layers.Input(shape=(input_dim,input_dim, 3))
+	# inputs  = keras.layers.Input(shape=(input_dim,input_dim, 3))
+	inputs = keras.layers.Input(shape=input_shape)
 	
 	#
 	#  Gets size of output layer
@@ -165,9 +167,7 @@ if __name__ == '__main__':
 	#
 	#  Training generator with lots of data augmentation	
 	#
-	# train_generator = ALPRDataGenerator(Data, batch_size = batch_size, dim =  dim, stride = int(model_stride), shuffle=True, OutputScale = 1.0)
-	train_generator = ALPRDataGenerator(Data, 
-									 batch_size = batch_size, dim =  dim, stride = int(model_stride), shuffle=True, OutputScale = 1.0)
+	train_generator = ALPRDataGenerator(Data, batch_size = batch_size, dim =  dim, stride = int(model_stride), shuffle=True, OutputScale = 1.0)
 
 	#
 	#  Compiles Model
