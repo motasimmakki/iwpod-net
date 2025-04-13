@@ -37,8 +37,8 @@ def create_model_iwpodnet():
 	#  separately
 	#
 	
-	# input_layer = Input(shape=(None,None,3),name='input')
-	input_layer = Input(shape=(None,None,4),name='input') # Adding CED layer
+	input_layer = Input(shape=(None,None,3),name='input')
+	# input_layer = Input(shape=(None,None,4),name='input') # Adding CED layer
 
 	x = conv_batch(input_layer, 16, 3)
 	x = conv_batch(x, 16, 3)

@@ -58,8 +58,8 @@ def load_network(modelpath, input_dim):
 		print('Loaded weights')
 	else:
 		print('Training from scratch')
-	# input_shape = (input_dim,input_dim,3)
-	input_shape = (input_dim, input_dim, 4)  # Adding CED layer
+	input_shape = (input_dim,input_dim,3)
+	# input_shape = (input_dim, input_dim, 4)  # Adding CED layer
 
 	# Fixed input size for training
 	# inputs  = keras.layers.Input(shape=(input_dim,input_dim, 3))
