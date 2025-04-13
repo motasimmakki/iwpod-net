@@ -50,22 +50,22 @@ if __name__ == '__main__':
     # Get the first batch
     X_batch, y_batch = generator[0]  # X_batch shape: (batch_size, 208, 208, 4)
 
-    # Plot the batch
-    for i in range(min(4, len(X_batch))):
-        rgb_image = X_batch[i, :, :, :3]  # RGB
-        edge_image = X_batch[i, :, :, 3]  # Canny edge
+    # # Plot the batch
+    # for i in range(min(4, len(X_batch))):
+    #     rgb_image = X_batch[i, :, :, :3]  # RGB
+    #     edge_image = X_batch[i, :, :, 3]  # Canny edge
 
-        plt.figure(figsize=(8, 4))
+    #     plt.figure(figsize=(8, 4))
 
-        plt.subplot(1, 2, 1)
-        plt.imshow(rgb_image.astype('uint8'))
-        plt.title('RGB Image')
-        plt.axis('off')
+    #     plt.subplot(1, 2, 1)
+    #     plt.imshow(rgb_image.astype('uint8'))
+    #     plt.title('RGB Image')
+    #     plt.axis('off')
 
-        plt.subplot(1, 2, 2)
-        plt.imshow(edge_image, cmap='gray')
-        plt.title('Canny Edge')
-        plt.axis('off')
+    #     plt.subplot(1, 2, 2)
+    #     plt.imshow(edge_image, cmap='gray')
+    #     plt.title('Canny Edge')
+    #     plt.axis('off')
 
-        plt.suptitle(f"Sample {i+1}")
-        plt.show()
+    #     plt.suptitle(f"Sample {i+1}")
+    #     plt.show()
