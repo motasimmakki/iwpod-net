@@ -26,20 +26,20 @@
 # 	#lp_threshold = 0.35 # detection threshold
 # 	lp_threshold = args.lp_threshold
 # 	ocr_input_size = [80, 240] # desired LP size (width x height)
-	
+    
 # 	#
 # 	#  Loads network and weights
 # 	#
 # 	iwpod_net = load_model('weights/iwpod_net')
 # 	# iwpod_net = load_model('weights/trained_iwpodnet_aolp')
-	
+    
 
 # 	#
 # 	#  Loads image with vehicle crop or full image with vehicle(s) roughly framed.
 # 	#  You can use your favorite object detector here (a fine-tuned version of Yolo-v3 was
 # 	#  used in the paper)
 # 	#
-	
+    
 # 	#
 # 	#  Also inform the vehicle type:
 # 	#  'car', 'bus', 'truck' 
@@ -91,7 +91,7 @@
 
 # 		# Load GT
 # 		gt_pts = load_ground_truth(txt_path, Ivehicle.shape)
-		
+        
 # 		# Compute Q-IoU
 # 		pts = pts.T
 # 		q_iou = compute_qiou(pts, gt_pts)
@@ -119,7 +119,7 @@
 # 	cv2.imshow('Image and LPs', Ivehicle )
 # 	cv2.waitKey()
 # 	cv2.destroyAllWindows()
-	
+    
 
  
 
@@ -146,7 +146,13 @@ if __name__ == '__main__':
     lp_threshold = args.lp_threshold
     ocr_input_size = [80, 240]  # width x height
 
-    iwpod_net = load_model('weights/iwpod_net')
+    # iwpod_net = load_model('weights/iwpod_net')
+    # iwpod_net = load_model('weights/iwpodnet_aolp_200')
+    # iwpod_net = load_model('weights/trained_iwpodnet_aolp')
+    # iwpod_net = load_model('weights/trained_iwpodnet_200')
+    # iwpod_net = load_model('weights/canny_iwpodnet_10')
+    # iwpod_net = load_model('weights/trained_iwpodnet_10_Canny')
+    iwpod_net = load_model('weights/trained_iwpodnet_canny')
 
     image_paths = []
     if args.images:
@@ -194,7 +200,14 @@ if __name__ == '__main__':
             q_iou = compute_qiou(pts, gt_pts)
             print(f"Q-IoU for {img_path}: {q_iou:.4f}")
             qiou_list.append(q_iou)
-
+            
+            
+            # Optionally draw GT box
+            for i in range(4):
+                pt1 = tuple(gt_pts[i % 4].astype(int))
+                pt2 = tuple(gt_pts[(i + 1) % 4].astype(int))
+                cv2.line(Ivehicle, pt1, pt2, (0, 255, 0), 2)  # green for GT
+            
             pts = pts.T
             draw_losangle(Ivehicle, pts, color=(0, 0, 255), thickness=2)
             cv2.imshow(f'Rectified plate {i}', img)

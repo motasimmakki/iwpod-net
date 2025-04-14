@@ -60,7 +60,7 @@ class ALPRDataGenerator(keras.utils.Sequence):
         return X, y
 
     # # Adding CED layer
-    # Applying Canny with augmentation, visualizing script is not here for this.
+    # # Applying Canny with augmentation, visualizing script is not here for this.
     # def __data_generation(self, indexes):
     #     'Generates data containing batch_size samples with Canny Edge Concatenation'
 
@@ -83,7 +83,7 @@ class ALPRDataGenerator(keras.utils.Sequence):
 
     #         # Generate corresponding label
     #         YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa=0.5)
-    #         y[i] = YY
+    #         y[i] = YY   
 
     #     return X, y
 
