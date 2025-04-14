@@ -147,8 +147,8 @@ if __name__ == '__main__':
     ocr_input_size = [80, 240]  # width x height
 
     # iwpod_net = load_model('weights/iwpod_net')
-    # iwpod_net = load_model('weights/iwpodnet_canny_200')
-    iwpod_net = load_model('weights/iwpodnet_aolp_200')
+    # iwpod_net = load_model('weights/iwpodnet_aolp_200')
+    iwpod_net = load_model('weights/iwpodnet_canny_200')
     # iwpod_net = load_model('weights/trained_iwpodnet_200')
     # iwpod_net = load_model('weights/trained_iwpodnet_aolp')
     # iwpod_net = load_model('weights/canny_iwpodnet_10')
