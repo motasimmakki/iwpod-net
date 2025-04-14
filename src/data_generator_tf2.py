@@ -45,19 +45,19 @@ class ALPRDataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
 
-    def __data_generation(self, indexes):
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
+    # def __data_generation(self, indexes):
+    #     'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
 
-        X = np.empty((self.batch_size, self.dim, self.dim, 3))
-        y = np.empty((self.batch_size, self.dim//self.stride, self.dim//self.stride, 9))
-        # Generate data
-        for i, idx in enumerate(indexes):
-            # Store sample
-            XX, llp, ptslist = augment_sample(self.data[idx][0], self.data[idx][1], self.dim)
-            YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa = 0.5)
-            X[i,] = XX*self.OutputScale
-            y[i,] = YY
-        return X, y
+    #     X = np.empty((self.batch_size, self.dim, self.dim, 3))
+    #     y = np.empty((self.batch_size, self.dim//self.stride, self.dim//self.stride, 9))
+    #     # Generate data
+    #     for i, idx in enumerate(indexes):
+    #         # Store sample
+    #         XX, llp, ptslist = augment_sample(self.data[idx][0], self.data[idx][1], self.dim)
+    #         YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa = 0.5)
+    #         X[i,] = XX*self.OutputScale
+    #         y[i,] = YY
+    #     return X, y
 
     # # Adding CED layer
     # # Applying Canny with augmentation, visualizing script is not here for this.
@@ -190,3 +190,34 @@ class ALPRDataGenerator(keras.utils.Sequence):
     #         # y[i] = YY
 
     #     return X, y
+
+    # Tested CED implementation, without alteration in model architecture.
+    def __data_generation(self, indexes):
+        'Generates data containing batch_size samples with Canny Edge blended into RGB (keeps 3 channels)'
+
+        # Keep shape at 3 channels (RGB with edge info blended in)
+        X = np.empty((self.batch_size, self.dim, self.dim, 3), dtype=np.float32)
+        y = np.empty((self.batch_size, self.dim // self.stride, self.dim // self.stride, 9), dtype=np.float32)
+
+        for i, idx in enumerate(indexes):
+            # Augment sample
+            XX, llp, ptslist = augment_sample(self.data[idx][0], self.data[idx][1], self.dim)
+
+            # Apply Canny Edge Detection
+            gray = cv2.cvtColor((XX * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+            edges = cv2.Canny(gray, threshold1=100, threshold2=200)
+            edges = edges.astype(np.float32) / 255.0  # Normalize to 0-1
+            edges = np.expand_dims(edges, axis=-1)    # Shape: (H, W, 1)
+
+            # Option 1: Blend edges across all 3 RGB channels
+            XX_blended = XX + 0.1 * np.repeat(edges, 3, axis=-1)  # Light blend
+            XX_blended = np.clip(XX_blended, 0, 1)  # Keep values in range
+
+            # Store input with edge-enhanced RGB (shape still (H, W, 3))
+            X[i] = XX_blended * self.OutputScale
+
+            # Generate corresponding label
+            YY = labels2output_map(llp, ptslist, self.dim, self.stride, alfa=0.5)
+            y[i] = YY
+
+        return X, y
